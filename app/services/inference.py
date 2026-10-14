@@ -62,8 +62,12 @@ def load_model() -> bool:
     # Load tokenizer
     try:
         from transformers import DistilBertTokenizerFast
-        _tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
-        logger.info("Tokenizer loaded.")
+        if os.path.exists(settings.tokenizer_path):
+            _tokenizer = DistilBertTokenizerFast.from_pretrained(settings.tokenizer_path)
+            logger.info("Tokenizer loaded from local path: %s", settings.tokenizer_path)
+        else:
+            _tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
+            logger.info("Tokenizer loaded from online pretrained.")
     except Exception as e:
         logger.warning("Tokenizer load failed: %s", e)
         _model_loaded = False

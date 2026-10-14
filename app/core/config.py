@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     scaler_path: str = Field(
         default="models/scaler.pkl", env="SCALER_PATH"
     )
+    tokenizer_path: str = Field(
+        default="models/tokenizer", env="TOKENIZER_PATH"
+    )
 
     # Scoring weights
     nlp_weight: float = Field(default=0.8, env="NLP_WEIGHT")

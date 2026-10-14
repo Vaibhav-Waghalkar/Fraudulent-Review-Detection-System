@@ -8,15 +8,14 @@ pydantic-settings==2.2.1
 pymongo==4.7.2
 motor==3.4.0
 mongomock==4.1.2
+mongomock-motor==0.0.36
 
 # Cache & Queue
 redis==5.0.4
 celery==5.4.0
-celery[redis]==5.4.0
-flower==2.0.1
 
-# ML
-torch==2.3.0
+# ML & Numerics
+torch==2.5.1
 transformers==4.40.2
 scikit-learn==1.4.2
 imbalanced-learn==0.12.2
@@ -30,10 +29,10 @@ pandas==2.2.2
 # Explainability
 lime==0.2.0.1
 
-# Data generation
+# Data generation & Synthetic
 faker==24.11.0
 
-# Visualization
+# Visualization & Reporting
 matplotlib==3.8.4
 
 # Testing
@@ -46,8 +45,5 @@ requests==2.31.0
 # Utilities
 python-dotenv==1.0.1
 python-multipart==0.0.9
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-aiohttp==3.9.5
 tqdm==4.66.4
 joblib==1.4.2

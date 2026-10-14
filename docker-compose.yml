@@ -25,21 +25,9 @@ services:
         condition: service_healthy
     networks:
       - reviewguard-net
-    entrypoint: >
-      bash -c "
-        mongosh --host mongo1:27017 --eval '
-          try {
-            rs.status();
-            echo("Replica set already initialized");
-          } catch (e) {
-            rs.initiate({
-              _id: "rs0",
-              members: [{ _id: 0, host: "localhost:27017" }]
-            });
-            echo("Replica set initialized with localhost:27017");
-          }
-        '
-      "
+    volumes:
+      - ./scripts/mongo-init.js:/scripts/mongo-init.js:ro
+    entrypoint: ["mongosh", "--host", "mongo1:27017", "/scripts/mongo-init.js"]
     restart: "no"
 
   redis:
@@ -68,10 +56,11 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
-      - MODEL_PATH=/app/models/fusion_model.onnx
+      - MODEL_PATH=/app/models/fusion_model_quantized.onnx
       - QUANTIZED_MODEL_PATH=/app/models/fusion_model_quantized.onnx
       - REFERENCE_SCORES_PATH=/app/models/reference_scores.npy
       - SCALER_PATH=/app/models/scaler.pkl
+      - TOKENIZER_PATH=/app/models/tokenizer
       - WEBHOOK_SECRET=changeme-webhook-secret
     volumes:
       - ./models:/app/models
@@ -97,10 +86,11 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
-      - MODEL_PATH=/app/models/fusion_model.onnx
+      - MODEL_PATH=/app/models/fusion_model_quantized.onnx
       - QUANTIZED_MODEL_PATH=/app/models/fusion_model_quantized.onnx
       - REFERENCE_SCORES_PATH=/app/models/reference_scores.npy
       - SCALER_PATH=/app/models/scaler.pkl
+      - TOKENIZER_PATH=/app/models/tokenizer
     volumes:
       - ./models:/app/models
       - ./ml:/app/ml
@@ -109,6 +99,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
     networks:
       - reviewguard-net
 
