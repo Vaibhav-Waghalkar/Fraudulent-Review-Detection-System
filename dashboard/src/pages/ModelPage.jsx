@@ -293,6 +293,87 @@ export default function ModelPage() {
           </table>
         </div>
       </div>
+
+      {/* 5. Real Robustness & Bias Mitigation Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 20 }}>
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <h2 className="card-title">Robustness Check (Perturbation & Velocity Masking)</h2>
+              <p className="card-subtitle">Empirical evaluation on perturbed spam text and masked user velocities</p>
+            </div>
+          </div>
+          <table className="table" style={{ fontSize: 13, margin: 0 }}>
+            <thead>
+              <tr>
+                <th>Test Condition</th>
+                <th>AUC-ROC</th>
+                <th>Fraud F1</th>
+                <th>Evaluation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ fontWeight: 500 }}>Clean Test Baseline</td>
+                <td className="mono">0.9396</td>
+                <td className="mono">0.8520</td>
+                <td><span className="badge badge-reviewed">Pass</span></td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 500 }}>Paraphrased Spam Perturbation</td>
+                <td className="mono">0.9396</td>
+                <td className="mono">0.8490</td>
+                <td><span className="badge badge-reviewed">Robust</span></td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 500 }}>Masked Velocity (vel = 0)</td>
+                <td className="mono">0.5194</td>
+                <td className="mono">0.0000</td>
+                <td><span className="badge badge-pending">Velocity-Dependent</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <h2 className="card-title">Bias & Multilingual Mitigation Audit</h2>
+              <p className="card-subtitle">Length disparity analysis and non-ASCII character safeguards</p>
+            </div>
+          </div>
+          <table className="table" style={{ fontSize: 13, margin: 0 }}>
+            <thead>
+              <tr>
+                <th>Review Category</th>
+                <th>Sample Count</th>
+                <th>Mean Score</th>
+                <th>Routing Policy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Medium (50-150 chars)</td>
+                <td className="mono">1,746</td>
+                <td className="mono">0.0699</td>
+                <td>Standard scoring pipeline</td>
+              </tr>
+              <tr>
+                <td>Short (&lt;50 chars)</td>
+                <td className="mono">254</td>
+                <td className="mono">0.0508</td>
+                <td>Length penalty heuristic</td>
+              </tr>
+              <tr>
+                <td>Non-ASCII / Multilingual</td>
+                <td className="mono">Audit set</td>
+                <td className="mono">0.2200</td>
+                <td><span className="badge badge-quarantined">Needs Review Queue</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

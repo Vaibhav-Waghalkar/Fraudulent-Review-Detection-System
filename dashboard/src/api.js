@@ -54,6 +54,17 @@ export function fetchModelInfo() {
   return apiFetch("/model/info");
 }
 
+export function scoreBatch(items) {
+  return apiFetch("/reviews/detect/batch", {
+    method: "POST",
+    body: JSON.stringify(items),
+  });
+}
+
+export function fetchAuditLogs(limit = 100) {
+  return apiFetch(`/reviews/audit/logs?limit=${limit}`);
+}
+
 export function fetchHealth() {
   return fetch("/health").then((r) => r.json());
 }

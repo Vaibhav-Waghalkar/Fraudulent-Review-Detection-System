@@ -5,6 +5,8 @@ import ReviewsPage from "./pages/ReviewsPage.jsx";
 import DriftPage from "./pages/DriftPage.jsx";
 import ReviewDetailPage from "./pages/ReviewDetailPage.jsx";
 import ModelPage from "./pages/ModelPage.jsx";
+import TryItPage from "./pages/TryItPage.jsx";
+import AuditPage from "./pages/AuditPage.jsx";
 
 export default function App() {
   return (
@@ -16,6 +18,8 @@ export default function App() {
         <Route path="/reviews/:id" element={<ReviewDetailPage />} />
         <Route path="/drift" element={<DriftPage />} />
         <Route path="/model" element={<ModelPage />} />
+        <Route path="/try-it" element={<TryItPage />} />
+        <Route path="/audit" element={<AuditPage />} />
       </Routes>
     </Layout>
   );

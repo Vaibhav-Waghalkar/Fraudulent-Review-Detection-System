@@ -153,7 +153,11 @@ export default function DriftPage() {
         <div className="kpi-card">
           <span className="kpi-label">Latest p-value</span>
           <span className="kpi-value mono" style={{ fontSize: 20 }}>
-            {latestPValue != null ? Number(latestPValue).toExponential(4) : "N/A"}
+            {latestPValue != null
+              ? Number(latestPValue) < 1e-16
+                ? "< 1e-16"
+                : Number(latestPValue).toExponential(4)
+              : "N/A"}
           </span>
           <span className="kpi-meta">Significance threshold &alpha; = 0.05</span>
         </div>
@@ -233,7 +237,7 @@ export default function DriftPage() {
                     }}
                   />
                   <Line
-                    type="monotone"
+                    type="linear"
                     dataKey="pValue"
                     stroke="var(--accent)"
                     strokeWidth={2}

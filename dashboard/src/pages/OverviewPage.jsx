@@ -190,10 +190,10 @@ export default function OverviewPage() {
                   y={0.05}
                   stroke="var(--danger)"
                   strokeDasharray="4 4"
-                  label={{ value: "5% Target Threshold", fill: "var(--danger)", fontSize: 10, position: "top" }}
+                  label={{ value: "5% training prevalence", fill: "var(--danger)", fontSize: 10, position: "top" }}
                 />
                 <Line
-                  type="monotone"
+                  type="linear"
                   dataKey="fraud_rate"
                   stroke="var(--accent)"
                   strokeWidth={2}

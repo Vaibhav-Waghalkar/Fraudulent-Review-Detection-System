@@ -123,8 +123,30 @@ export default function Layout({ children }) {
           </div>
 
           <div>
-            <div className="sidebar-group-title">Model</div>
+            <div className="sidebar-group-title">Model & Tools</div>
             <ul className="sidebar-nav">
+              <li>
+                <NavLink
+                  to="/try-it"
+                  className={({ isActive }) =>
+                    "sidebar-nav-link" + (isActive ? " active" : "")
+                  }
+                >
+                  <Cpu aria-hidden="true" />
+                  <span>Try It</span>
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/audit"
+                  className={({ isActive }) =>
+                    "sidebar-nav-link" + (isActive ? " active" : "")
+                  }
+                >
+                  <Shield aria-hidden="true" />
+                  <span>Audit Trail</span>
+                </NavLink>
+              </li>
               <li>
                 <NavLink
                   to="/model"
@@ -135,6 +157,17 @@ export default function Layout({ children }) {
                   <Cpu aria-hidden="true" />
                   <span>Model Info</span>
                 </NavLink>
+              </li>
+              <li>
+                <a
+                  href="http://127.0.0.1:8000/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sidebar-nav-link"
+                >
+                  <Activity aria-hidden="true" />
+                  <span>Swagger API Docs</span>
+                </a>
               </li>
             </ul>
           </div>
@@ -243,15 +276,6 @@ export default function Layout({ children }) {
               />
               <span>Auto-refresh: {autoRefresh ? "ON" : "OFF"}</span>
             </button>
-
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={handleManualRefresh}
-              title="Refresh page data"
-            >
-              Refresh
-            </button>
           </div>
         </header>
 
@@ -259,7 +283,7 @@ export default function Layout({ children }) {
 
         {/* Demo notice footer */}
         <footer className="demo-notice-footer">
-          ReviewGuard Enterprise Fraud Engine. Displaying seeded synthetic demo dataset from production telemetry.
+          Seeded synthetic demo data.
         </footer>
       </main>
     </div>

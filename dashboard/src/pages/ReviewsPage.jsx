@@ -247,6 +247,8 @@ export default function ReviewsPage() {
     switch (status?.toLowerCase()) {
       case "quarantined":
         return <span className="badge badge-quarantined">Quarantined</span>;
+      case "needs_review":
+        return <span className="badge" style={{ background: "rgba(168, 116, 26, 0.15)", color: "#c68a24", border: "1px solid rgba(168, 116, 26, 0.3)" }}>Needs Review</span>;
       case "reviewed":
         return <span className="badge badge-reviewed">Reviewed</span>;
       case "approved":
@@ -267,6 +269,7 @@ export default function ReviewsPage() {
       <div style={{ display: "flex", gap: 6, borderBottom: "1px solid var(--border)", marginBottom: 16, overflowX: "auto" }}>
         {[
           { key: "all", label: "All Reviews", count: totalCount },
+          { key: "needs_review", label: "Needs Review (0.4 - 0.7)", count: statusCounts.needs_review || 0 },
           { key: "quarantined", label: "Quarantined", count: statusCounts.quarantined || 0 },
           { key: "reviewed", label: "Reviewed", count: statusCounts.reviewed || 0 },
           { key: "approved", label: "Approved", count: statusCounts.approved || 0 },
