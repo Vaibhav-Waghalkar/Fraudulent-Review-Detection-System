@@ -23,8 +23,8 @@ ReviewGuard is a fraud detection service that identifies fake and malicious prod
 
 ### Step 1: Clone and Configure Environment
 ```bash
-git clone https://github.com/Vaibhav-Waghalkar/ReviewGuard_Vaibhav.git
-cd ReviewGuard_Vaibhav
+git clone https://github.com/Vaibhav-Waghalkar/ReviewGuard-Fraudulent_Review_Detection_System.git
+cd ReviewGuard-Fraudulent_Review_Detection_System
 
 # Create and activate Python 3.11 virtual environment
 python -m venv .venv
@@ -310,3 +310,9 @@ Sample JSON payloads for all API endpoints are documented in `docs/sample_respon
 2. **Review Length Truncation**: Model input is truncated to 128 tokens for ONNX inference to maintain CPU throughput. Reviews exceeding 128 tokens rely primarily on initial sentences for NLP inference.
 3. **Batch 100 CPU Latency**: At 100 reviews per batch, CPU latency averages ~270 ms. Batches up to 32 reviews execute comfortably under the 200 ms target (161.8 ms); batch sizes >= 100 in production should utilize GPU execution providers (CUDA / TensorRT).
 4. **LIME Latency**: LIME computes 500 text perturbations per explanation, requiring 1.5 to 3.0 seconds per review on CPU. Explanations are generated on demand.
+ 
+---
+
+## 13. License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
