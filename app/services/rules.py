@@ -72,6 +72,22 @@ def check_unusual_sentiment(text: str) -> dict | None:
     return None
 
 
+def check_language_bias(text: str) -> dict | None:
+    """Flag non-English or high non-ASCII reviews for human review."""
+    if not text:
+        return None
+    non_ascii_chars = sum(1 for c in text if ord(c) > 127)
+    ratio = non_ascii_chars / len(text)
+    if ratio > 0.15:
+        return {
+            "rule": "low_confidence_language",
+            "description": "Low confidence, needs human review (non-English or high non-ASCII characters).",
+            "value": round(ratio, 3),
+            "threshold": 0.15,
+        }
+    return None
+
+
 def score_rules(text: str, rating: int, velocity: int) -> tuple[float, list[dict]]:
     """
     Returns (rule_score 0-1, list of triggered rule explanations).
@@ -84,6 +100,7 @@ def score_rules(text: str, rating: int, velocity: int) -> tuple[float, list[dict
         check_high_velocity(velocity),
         check_extreme_rating_generic_text(text, rating),
         check_unusual_sentiment(text),
+        check_language_bias(text),
     ]
 
     for result in checks:

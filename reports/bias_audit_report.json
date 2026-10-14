@@ -1,0 +1,56 @@
+{
+  "length_disparity": [
+    {
+      "length_bucket": "Medium (50-150 chars)",
+      "count": 1746,
+      "mean_score": 0.06991981672394045,
+      "quarantine_rate": 0.0,
+      "needs_review_rate": 0.0
+    },
+    {
+      "length_bucket": "Short (<50 chars)",
+      "count": 254,
+      "mean_score": 0.050866141732283474,
+      "quarantine_rate": 0.0,
+      "needs_review_rate": 0.0
+    }
+  ],
+  "multilingual_mitigation_eval": [
+    {
+      "language": "Spanish",
+      "score": 0.02,
+      "status": "reviewed",
+      "mitigation_triggered": false
+    },
+    {
+      "language": "German",
+      "score": 0.02,
+      "status": "reviewed",
+      "mitigation_triggered": false
+    },
+    {
+      "language": "French",
+      "score": 0.02,
+      "status": "reviewed",
+      "mitigation_triggered": false
+    },
+    {
+      "language": "Hindi (Devanagari)",
+      "score": 0.22,
+      "status": "needs_review",
+      "mitigation_triggered": true
+    },
+    {
+      "language": "Chinese",
+      "score": 0.22,
+      "status": "needs_review",
+      "mitigation_triggered": true
+    },
+    {
+      "language": "Japanese",
+      "score": 0.22,
+      "status": "needs_review",
+      "mitigation_triggered": true
+    }
+  ]
+}

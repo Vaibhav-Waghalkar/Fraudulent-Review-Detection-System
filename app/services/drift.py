@@ -43,7 +43,8 @@ def run_ks_test(live_scores: np.ndarray) -> dict:
     if len(live_scores) < 30:
         return {"error": "Not enough live scores (need >= 30)", "alert": False}
 
-    stat, p_value = ks_2samp(_reference_scores, live_scores)
+    live_scores_f32 = np.asarray(live_scores, dtype=np.float32)
+    stat, p_value = ks_2samp(_reference_scores, live_scores_f32)
 
     alert = bool(p_value < settings.ks_p_value_threshold)
     return {

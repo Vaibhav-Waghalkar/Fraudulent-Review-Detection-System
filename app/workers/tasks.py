@@ -55,7 +55,11 @@ def score_review(self, review_id: str):
         )
         final_score = float(min(final_score, 1.0))
 
-        status = "quarantined" if final_score > settings.quarantine_threshold else "reviewed"
+        has_lang_bias = any(r.get("rule") == "low_confidence_language" for r in triggered_rules)
+        if has_lang_bias:
+            status = "needs_review"
+        else:
+            status = "quarantined" if final_score > settings.quarantine_threshold else "reviewed"
 
         # Update with transaction (replica set required)
         with client.start_session() as session:

@@ -124,7 +124,11 @@ async def detect_batch(
             settings.nlp_weight * nlp_score + settings.velocity_weight * vel_norm,
             1.0,
         ))
-        status = "quarantined" if final_score > settings.quarantine_threshold else "reviewed"
+        has_lang_bias = any(r.get("rule") == "low_confidence_language" for r in triggered_rules)
+        if has_lang_bias:
+            status = "needs_review"
+        else:
+            status = "quarantined" if final_score > settings.quarantine_threshold else "reviewed"
 
         doc = {
             "text": item.text,
@@ -326,6 +330,63 @@ async def override_review(
         note=payload.note,
         timestamp=now,
     )
+
+
+# ---------------------------------------------------------------------------
+# GET /api/reviews/export/labels (Moderator overrides CSV)
+# ---------------------------------------------------------------------------
+@router.get(
+    "/export/labels",
+    summary="Export moderator overrides as CSV labels dataset for retraining",
+)
+async def export_labels(db: AsyncIOMotorDatabase = Depends(get_db)):
+    import csv
+    import io
+    from fastapi.responses import Response
+
+    cursor = db["audit_log"].find().sort("timestamp", -1)
+    audit_docs = await cursor.to_list(length=5000)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["review_id", "moderator_id", "action", "previous_status", "new_status", "note", "timestamp"])
+
+    for a in audit_docs:
+        writer.writerow([
+            str(a.get("review_id", "")),
+            str(a.get("moderator_id", "")),
+            str(a.get("action", "")),
+            str(a.get("previous_status", "")),
+            str(a.get("new_status", "")),
+            str(a.get("note", "")),
+            a.get("timestamp").isoformat() if hasattr(a.get("timestamp"), "isoformat") else str(a.get("timestamp", "")),
+        ])
+
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=moderator_labels.csv"},
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /api/reviews/audit/logs (Global audit log list)
+# ---------------------------------------------------------------------------
+@router.get(
+    "/audit/logs",
+    summary="Get recent moderator audit actions",
+)
+async def get_audit_logs(
+    limit: int = 100,
+    db: AsyncIOMotorDatabase = Depends(get_db),
+):
+    cursor = db["audit_log"].find().sort("timestamp", -1).limit(min(limit, 200))
+    docs = await cursor.to_list(length=limit)
+    for d in docs:
+        d["id"] = str(d.pop("_id"))
+        if hasattr(d.get("timestamp"), "isoformat"):
+            d["timestamp"] = d["timestamp"].isoformat()
+    return docs
 
 
 # ---------------------------------------------------------------------------
