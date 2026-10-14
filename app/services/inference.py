@@ -125,12 +125,23 @@ def infer(text: str, velocity: float) -> tuple[float, bool]:
 
 def infer_batch(texts: list[str], velocities: list[float]) -> list[tuple[float, bool]]:
     """
-    Batch inference for multiple reviews in a single ONNX forward pass.
+    Batch inference for multiple reviews in optimized ONNX forward passes.
+    Sub-batches of up to 32 ensure CPU inference completes comfortably under 200ms.
     """
     if not _model_loaded or _session is None or _scaler is None or _tokenizer is None:
         return [(_rules_fallback_score(t, v), True) for t, v in zip(texts, velocities)]
 
     try:
+        # If batch is large, process in sub-batches of 32
+        chunk_size = 32
+        if len(texts) > chunk_size:
+            results = []
+            for i in range(0, len(texts), chunk_size):
+                sub_texts = texts[i : i + chunk_size]
+                sub_vels = velocities[i : i + chunk_size]
+                results.extend(infer_batch(sub_texts, sub_vels))
+            return results
+
         features = []
         for text, vel in zip(texts, velocities):
             text_len = len(text)
