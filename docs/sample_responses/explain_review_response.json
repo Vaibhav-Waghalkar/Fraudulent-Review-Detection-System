@@ -1,0 +1,49 @@
+{
+  "review_id": "6acf59ac0a9d6ac380cb7f99",
+  "lime_explanation": {
+    "top_features": {
+      "BEST": 0.0,
+      "EVER": 0.0,
+      "Use": 0.0,
+      "promo": 0.0,
+      "code": 0.0,
+      "BEST10": 0.0,
+      "Order": 0.0,
+      "immediately": 0.0
+    },
+    "local_explanation": [
+      {
+        "word": "BEST",
+        "importance": 0.0
+      },
+      {
+        "word": "EVER",
+        "importance": 0.0
+      },
+      {
+        "word": "Use",
+        "importance": 0.0
+      },
+      {
+        "word": "promo",
+        "importance": 0.0
+      },
+      {
+        "word": "code",
+        "importance": 0.0
+      },
+      {
+        "word": "BEST10",
+        "importance": 0.0
+      },
+      {
+        "word": "Order",
+        "importance": 0.0
+      },
+      {
+        "word": "immediately",
+        "importance": 0.0
+      }
+    ]
+  }
+}

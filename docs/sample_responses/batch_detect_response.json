@@ -1,0 +1,52 @@
+[
+  {
+    "id": "6acf59ac0a9d6ac380cb7f98",
+    "score": 2.020857614581928e-09,
+    "status": "reviewed",
+    "explanation": {
+      "rules": [
+        {
+          "rule": "extreme_rating_generic_text",
+          "description": "Extreme rating paired with very short or generic text.",
+          "value": {
+            "rating": 5,
+            "text_length": 73
+          },
+          "threshold": {
+            "ratings": [
+              1,
+              5
+            ],
+            "min_length": 80
+          }
+        }
+      ]
+    },
+    "fallback": false
+  },
+  {
+    "id": "6acf59ac0a9d6ac380cb7f99",
+    "score": 0.8,
+    "status": "quarantined",
+    "explanation": {
+      "rules": [
+        {
+          "rule": "extreme_rating_generic_text",
+          "description": "Extreme rating paired with very short or generic text.",
+          "value": {
+            "rating": 5,
+            "text_length": 52
+          },
+          "threshold": {
+            "ratings": [
+              1,
+              5
+            ],
+            "min_length": 80
+          }
+        }
+      ]
+    },
+    "fallback": false
+  }
+]

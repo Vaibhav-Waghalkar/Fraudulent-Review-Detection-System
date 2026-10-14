@@ -1,0 +1,7 @@
+{
+  "checked_at": null,
+  "p_value": null,
+  "alert": false,
+  "message": "No drift checks have run yet. Start the Celery beat scheduler.",
+  "recent_events": []
+}

@@ -1,0 +1,151 @@
+version: "3.9"
+
+services:
+  mongo1:
+    image: mongo:7.0
+    container_name: reviewguard-mongo1
+    command: mongod --replSet rs0 --bind_ip_all --port 27017
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo1_data:/data/db
+    networks:
+      - reviewguard-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-init:
+    image: mongo:7.0
+    container_name: reviewguard-mongo-init
+    depends_on:
+      mongo1:
+        condition: service_healthy
+    networks:
+      - reviewguard-net
+    entrypoint: >
+      bash -c "
+        mongosh --host mongo1:27017 --eval '
+          try {
+            rs.status();
+            echo("Replica set already initialized");
+          } catch (e) {
+            rs.initiate({
+              _id: "rs0",
+              members: [{ _id: 0, host: "localhost:27017" }]
+            });
+            echo("Replica set initialized with localhost:27017");
+          }
+        '
+      "
+    restart: "no"
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: reviewguard-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - reviewguard-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reviewguard-api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://mongo1:27017/?replicaSet=rs0
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - MODEL_PATH=/app/models/fusion_model.onnx
+      - QUANTIZED_MODEL_PATH=/app/models/fusion_model_quantized.onnx
+      - REFERENCE_SCORES_PATH=/app/models/reference_scores.npy
+      - SCALER_PATH=/app/models/scaler.pkl
+      - WEBHOOK_SECRET=changeme-webhook-secret
+    volumes:
+      - ./models:/app/models
+      - ./ml:/app/ml
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
+    networks:
+      - reviewguard-net
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reviewguard-worker
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - MONGODB_URI=mongodb://mongo1:27017/?replicaSet=rs0
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - MODEL_PATH=/app/models/fusion_model.onnx
+      - QUANTIZED_MODEL_PATH=/app/models/fusion_model_quantized.onnx
+      - REFERENCE_SCORES_PATH=/app/models/reference_scores.npy
+      - SCALER_PATH=/app/models/scaler.pkl
+    volumes:
+      - ./models:/app/models
+      - ./ml:/app/ml
+    depends_on:
+      mongo1:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - reviewguard-net
+
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reviewguard-beat
+    command: celery -A app.workers.celery_app beat --loglevel=info --scheduler celery.beat:PersistentScheduler
+    environment:
+      - MONGODB_URI=mongodb://mongo1:27017/?replicaSet=rs0
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - REFERENCE_SCORES_PATH=/app/models/reference_scores.npy
+    volumes:
+      - ./models:/app/models
+    depends_on:
+      - redis
+    networks:
+      - reviewguard-net
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: reviewguard-dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - reviewguard-net
+
+networks:
+  reviewguard-net:
+    driver: bridge
+
+volumes:
+  mongo1_data:

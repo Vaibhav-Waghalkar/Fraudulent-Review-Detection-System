@@ -1,0 +1,40 @@
+# Environments & Dependencies
+.venv/
+env/
+venv/
+node_modules/
+
+# Build artifacts
+dashboard/dist/
+dist/
+build/
+*.egg-info/
+
+# Python Cache & Coverage
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+reports/coverage_html/
+
+# Secrets & Config
+.env
+.env.local
+
+# Large Models (>100MB, keep INT8 quantized ONNX ~65MB)
+models/fusion_model.onnx
+*.pt
+models/*.pt
+models/fraud_detector_best.pt
+models/fusion_head_best.pt
+models/*_emb.npy
+
+# Celery
+celerybeat-schedule*
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

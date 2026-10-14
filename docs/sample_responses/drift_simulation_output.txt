@@ -1,0 +1,11 @@
+=== Drift Simulation Results ===
+  Shift applied      : +0.4
+  Injected samples   : 500
+  Live scores (total): 2000
+  KS statistic       : 0.7449
+  p-value            : 0.000000
+  Alert fired        : True
+  Alert threshold    : p < 0.05
+  Notifications sent :
+    - [EMAIL ALERT] To: ops@reviewguard.internal | Subject: Drift Alert | [DRIFT ALERT] KS p-value=0.000000 < threshold=0.05. KS statistic=0.7449. Distribution shift detected in fraud scores.
+    - [SLACK ALERT] #ml-ops | [DRIFT ALERT] KS p-value=0.000000 < threshold=0.05. KS statistic=0.7449. Distribution shift detected in fraud scores.

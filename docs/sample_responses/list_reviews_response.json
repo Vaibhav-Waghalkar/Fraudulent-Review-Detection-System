@@ -1,0 +1,358 @@
+{
+  "total": 13,
+  "page": 1,
+  "page_size": 10,
+  "items": [
+    {
+      "id": "6acf59ac0a9d6ac380cb7f98",
+      "text": "Really enjoyed using this product. Battery life is good. Would recommend.",
+      "user_id": "legit-01",
+      "rating": 5,
+      "score": 2.020857614581928e-09,
+      "status": "reviewed",
+      "reasons": [
+        "extreme_rating_generic_text"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 73
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:30:04.629000",
+      "updated_at": "2026-10-14T10:30:04.629000",
+      "fallback": false
+    },
+    {
+      "id": "6acf59ac0a9d6ac380cb7f99",
+      "text": "BEST EVER! Use promo code BEST10. Order immediately!",
+      "user_id": "fraud-01",
+      "rating": 5,
+      "score": 0.8,
+      "status": "quarantined",
+      "reasons": [
+        "extreme_rating_generic_text"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 52
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:30:04.629000",
+      "updated_at": "2026-10-14T10:30:04.629000",
+      "fallback": false
+    },
+    {
+      "id": "6acf59aa0a9d6ac380cb7f97",
+      "text": "WOW absolutely incredible! Best purchase of my life! Limited time offer!",
+      "user_id": "user-test-001",
+      "rating": 5,
+      "score": 0.8800000000000001,
+      "status": "quarantined",
+      "reasons": [
+        "extreme_rating_generic_text",
+        "unusual_sentiment"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 72
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          },
+          {
+            "rule": "unusual_sentiment",
+            "description": "Unusually extreme sentiment polarity.",
+            "value": 0.8828,
+            "threshold": 0.85
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:30:02.590000",
+      "updated_at": "2026-10-14T10:30:02.708000",
+      "fallback": false
+    },
+    {
+      "id": "6acf59950a9d6ac380cb7f96",
+      "text": "Webhook incoming review! Very good product.",
+      "user_id": "wh-user-01",
+      "rating": 5,
+      "score": 0.8199908447265626,
+      "status": "quarantined",
+      "reasons": [
+        "extreme_rating_generic_text"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 43
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:29:41.241000",
+      "updated_at": "2026-10-14T10:29:41.293000",
+      "fallback": false
+    },
+    {
+      "id": "6acf59940a9d6ac380cb7f93",
+      "text": "Really enjoyed using this product. Battery life is good. Would recommend.",
+      "user_id": "legit-01",
+      "rating": 5,
+      "score": 2.020857614581928e-09,
+      "status": "reviewed",
+      "reasons": [
+        "extreme_rating_generic_text"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 73
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:29:40.264000",
+      "updated_at": "2026-10-14T10:29:40.264000",
+      "fallback": false
+    },
+    {
+      "id": "6acf59940a9d6ac380cb7f94",
+      "text": "BEST EVER! Use promo code BEST10. Order immediately!",
+      "user_id": "fraud-01",
+      "rating": 5,
+      "score": 0.8,
+      "status": "quarantined",
+      "reasons": [
+        "extreme_rating_generic_text"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 52
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:29:40.264000",
+      "updated_at": "2026-10-14T10:29:40.264000",
+      "fallback": false
+    },
+    {
+      "id": "6acf59920a9d6ac380cb7f92",
+      "text": "WOW absolutely incredible! Best purchase of my life! Limited time offer!",
+      "user_id": "user-test-001",
+      "rating": 5,
+      "score": 0.8600000000000001,
+      "status": "rejected",
+      "reasons": [
+        "extreme_rating_generic_text",
+        "unusual_sentiment"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 72
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          },
+          {
+            "rule": "unusual_sentiment",
+            "description": "Unusually extreme sentiment polarity.",
+            "value": 0.8828,
+            "threshold": 0.85
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:29:38.232000",
+      "updated_at": "2026-10-14T10:29:41.215000",
+      "fallback": false
+    },
+    {
+      "id": "6acf595b0a9d6ac380cb7f8f",
+      "text": "Really enjoyed using this product. Battery life is good. Would recommend.",
+      "user_id": "legit-01",
+      "rating": 5,
+      "score": 2.020857614581928e-09,
+      "status": "reviewed",
+      "reasons": [
+        "extreme_rating_generic_text"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 73
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:28:43.542000",
+      "updated_at": "2026-10-14T10:28:43.542000",
+      "fallback": false
+    },
+    {
+      "id": "6acf595b0a9d6ac380cb7f90",
+      "text": "BEST EVER! Use promo code BEST10. Order immediately!",
+      "user_id": "fraud-01",
+      "rating": 5,
+      "score": 0.8,
+      "status": "quarantined",
+      "reasons": [
+        "extreme_rating_generic_text"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 52
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:28:43.542000",
+      "updated_at": "2026-10-14T10:28:43.542000",
+      "fallback": false
+    },
+    {
+      "id": "6acf59590a9d6ac380cb7f8e",
+      "text": "WOW absolutely incredible! Best purchase of my life! Limited time offer!",
+      "user_id": "user-test-001",
+      "rating": 5,
+      "score": 0.8400000000000001,
+      "status": "rejected",
+      "reasons": [
+        "extreme_rating_generic_text",
+        "unusual_sentiment"
+      ],
+      "explanation": {
+        "rules": [
+          {
+            "rule": "extreme_rating_generic_text",
+            "description": "Extreme rating paired with very short or generic text.",
+            "value": {
+              "rating": 5,
+              "text_length": 72
+            },
+            "threshold": {
+              "ratings": [
+                1,
+                5
+              ],
+              "min_length": 80
+            }
+          },
+          {
+            "rule": "unusual_sentiment",
+            "description": "Unusually extreme sentiment polarity.",
+            "value": 0.8828,
+            "threshold": 0.85
+          }
+        ]
+      },
+      "created_at": "2026-10-14T10:28:41.489000",
+      "updated_at": "2026-10-14T10:28:44.549000",
+      "fallback": false
+    }
+  ]
+}
