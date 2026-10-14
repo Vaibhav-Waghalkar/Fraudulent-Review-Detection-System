@@ -193,30 +193,41 @@ pytest --cov=app --cov-report=term-missing
 ```
 
 ### Test Summary:
-- **Total Tests Passed**: 62
+- **Total Tests Passed**: 65
 - **Failures / Errors**: 0
-- **Overall Code Coverage**: **89%** (Target: 80%+)
-- **Test Modules Covered**: `test_api.py`, `test_inference.py`, `test_rules.py`, `test_drift.py`, `test_database.py`, `test_coverage_boost.py`.
+- **Overall Code Coverage**: **90%** (Target: 80%+)
+- **Test Modules Covered**: `test_api.py`, `test_inference.py`, `test_rules.py`, `test_drift.py`, `test_coverage_boost.py`, `test_fallback.py`.
 
 ---
 
-## 9. Design System & Dashboard Compliance
+## 9. Design System & Dashboard Pages
 
 The moderator dashboard strictly implements the following design requirements:
-- **Color Palette**: Background `#F6F4EF`, Surface `#FFFFFF`, Text `#1B1B1A`, Border `#E3DFD6`, Accent `#2F5D50`, Danger `#B23A2E`.
-- **Typography**: IBM Plex Sans (body, headings) and IBM Plex Mono (IDs, scores, code tokens).
-- **Prohibited Patterns**: Zero gradients, zero purple hues, zero pill buttons (max radius 6px), zero emojis (pure Lucide SVG icons), zero em dashes, zero animated cursor effects, and zero placeholder counters.
+- **Color Palette**: Light theme: Background `#F6F4EF`, Surface `#FFFFFF`, Text `#1B1B1A`, Border `#E3DFD6`, Accent `#2F5D50`, Danger `#B23A2E`, Warning `#A8741A`. Dark theme: Background `#141412`, Surface `#1C1C1A`, Text `#ECE9E1`, Border `#2E2D29`, Accent `#6FA593`, Danger `#E0705F`.
+- **Typography**: IBM Plex Sans (body, headings) and IBM Plex Mono (IDs, scores, code tokens), tabular numeric formatting.
+- **Prohibited Patterns**: Zero gradients (including shimmer), zero purple hues, zero pill buttons (max radius 6px), zero emojis (pure Lucide SVG icons), zero em dashes, zero animated cursor effects, and zero placeholder counters.
+- **Pages**:
+  1. **Overview** (default route): KPI strip (total reviews, quarantined, fraud rate, avg score, drift status, engine mode), Recharts daily fraud rate timeline with 5% target line, live vs reference score histogram overlay, recent quarantined list, latest drift event.
+  2. **Reviews**: Status tabs with real counts, risk presets (All, High >0.7, Med 0.4-0.7, Low <0.4), text/user search, sort, sticky header, 3px risk marker, relative timestamps, copy-id button, side drawer for quick inspection and inline approve/reject, keyboard shortcuts (j/k, Enter, a, r, Esc), CSV export, and pagination.
+  3. **Review Detail**: Inline LIME tokens highlighting fraud (brick red) vs legit (forest green) word weights with legend, composite score bar with 0.70 threshold marker, NLP vs velocity weights, rule reasons with triggering values, and audit timeline.
+  4. **Drift**: Log-scale p-value trend chart with 0.05 threshold line, reference vs live histogram, drift events table marking source (scheduled, simulated, manual), and on-demand "Run check now" button.
+  5. **Model Info**: Empirical separation notice, validation and test AUC/F1 cards, holdout confusion matrix, FP32 vs INT8 latency comparison chart, and ONNX benchmark table.
+  6. **System Status**: Live API, model, Mongo rs0, and Redis cache health indicators in sidebar footer.
 - **Screenshots**: Saved in `docs/screenshots/`:
-  - `reviews.png`: Review queue with filters and pagination
-  - `review_detail.png`: Review inspection, rule breakdown, and audit log
-  - `review_detail_lime.png`: On-demand LIME token attributions
-  - `drift.png`: KS statistic and drift history visualization
+  - `overview.png`: Overview KPIs and score distributions
+  - `reviews.png`: Reviews queue with tabs and risk presets
+  - `reviews_drawer.png`: Side drawer for quick inspection and review override
+  - `review_detail.png`: Review inspection, rule breakdown, and audit timeline
+  - `review_detail_lime.png`: Inline LIME token attribution highlights
+  - `drift.png`: KS statistic, log-scale p-value chart, and event log
+  - `model.png`: Confusion matrix, metrics cards, and benchmark chart
+  - `dark_theme.png`: Clean dark mode implementation
 
 ---
 
 ## 10. Sample API Responses
 
-Sample JSON payloads for all 9 API routes are saved in `docs/sample_responses/`:
+Sample JSON payloads for API routes are saved in `docs/sample_responses/`:
 1. `health_sample.json`: `/health` service status
 2. `submit_review_sample.json`: POST `/api/reviews/submit`
 3. `get_review_sample.json`: GET `/api/reviews/{id}`

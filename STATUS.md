@@ -24,10 +24,10 @@ Environment: Windows (PowerShell), Python 3.11.9 (`.venv`), PyTorch 2.5.1+cu121,
 ### Step 2: Test Suite & Coverage
 - **Unit and Integration Tests**:
   - Command: `pytest --cov=app --cov-report=term-missing`
-  - Key Result: PASS. **62 tests passed, 0 failures** in 15.68 seconds.
+  - Key Result: PASS. **65 tests passed, 0 failures** in 4.76 seconds.
 - **Test Code Coverage**:
   - Target: >= 80%
-  - Key Result: PASS. **89% total code coverage** across `app` modules (`app/api/reviews.py` 84%, `app/api/system.py` 100%, `app/core/config.py` 100%, `app/db/mongo.py` 96%, `app/services/cache.py` 88%, `app/services/drift.py` 88%, `app/services/explain.py` 87%, `app/services/inference.py` 97%, `app/services/rules.py` 98%, `app/workers/tasks.py` 86%).
+  - Key Result: PASS. **90% total code coverage** across `app` modules (`app/api/reviews.py` 94%, `app/api/system.py` 89%, `app/core/config.py` 100%, `app/db/mongo.py` 100%, `app/services/cache.py` 100%, `app/services/drift.py` 100%, `app/services/explain.py` 100%, `app/services/inference.py` 72%, `app/services/rules.py` 100%, `app/workers/tasks.py` 92%).
 
 ### Step 3: Machine Learning Pipeline
 - **Synthetic Data Generation**:

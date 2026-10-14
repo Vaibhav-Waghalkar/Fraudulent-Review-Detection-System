@@ -1,13 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Activity,
   AlertTriangle,
-  CheckCircle2,
-  RefreshCw,
-  TrendingDown,
-  Clock,
-  ShieldCheck,
-  ShieldAlert,
+  CheckCircle,
+  Play,
+  RotateCcw,
+  Activity,
+  Calendar,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -16,173 +15,198 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
   ReferenceLine,
+  BarChart,
+  Bar,
 } from "recharts";
-import { fetchDriftStatus } from "../api";
+import { fetchDriftStatus, runDriftCheck, fetchStats } from "../api";
 
 export default function DriftPage() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
+  const queryClient = useQueryClient();
+  const [runMessage, setRunMessage] = useState("");
+
+  const { data: driftData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["drift-status"],
     queryFn: fetchDriftStatus,
-    refetchInterval: 30000, // Poll every 30s
+    refetchInterval: 15000,
   });
 
-  const events = data?.recent_events || [];
-  const pValue = data?.p_value;
-  const isAlert = data?.alert;
+  const { data: stats } = useQuery({
+    queryKey: ["stats"],
+    queryFn: fetchStats,
+  });
 
-  // Prepare chart data from recent events (reverse to chronological order)
+  const runMutation = useMutation({
+    mutationFn: runDriftCheck,
+    onSuccess: (result) => {
+      setRunMessage(
+        result.alert
+          ? `Drift check finished: DRIFT DETECTED (p = ${Number(result.p_value).toExponential(3)}, KS = ${Number(result.ks_statistic).toFixed(4)})`
+          : `Drift check finished: STABLE (p = ${Number(result.p_value).toFixed(4)}, KS = ${Number(result.ks_statistic).toFixed(4)})`
+      );
+      queryClient.invalidateQueries({ queryKey: ["drift-status"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      setTimeout(() => setRunMessage(""), 6000);
+    },
+    onError: (err) => {
+      setRunMessage(`Check failed: ${err.message}`);
+    },
+  });
+
+  const events = driftData?.recent_events || [];
+  const latestPValue = driftData?.p_value;
+  const isAlert = driftData?.alert;
+
+  // Chart: p-values on log scale or formatted points
+  // We plot log10(p_value) or direct p-value with reference at 0.05
   const chartData = [...events]
     .reverse()
-    .map((evt, index) => {
-      const timeStr = evt.checked_at
-        ? new Date(evt.checked_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-        : `#${index + 1}`;
+    .map((evt, idx) => {
+      const p = evt.p_value != null ? Number(evt.p_value) : null;
+      // Clamped min for log visual
+      const safeP = p != null ? Math.max(p, 1e-6) : null;
       return {
-        name: timeStr,
-        timestamp: evt.checked_at,
-        pValue: evt.p_value != null ? Number(evt.p_value.toFixed(4)) : null,
+        id: idx + 1,
+        time: evt.checked_at
+          ? new Date(evt.checked_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+          : `#${idx + 1}`,
+        rawP: p,
+        pValue: safeP,
+        ks: evt.ks_statistic != null ? Number(evt.ks_statistic).toFixed(4) : "N/A",
+        source: evt.source || (evt.simulated ? "simulated" : "scheduled"),
         alert: evt.alert,
-        sampleSize: evt.sample_size || 0,
       };
     })
     .filter((d) => d.pValue != null);
 
+  const scoreDistribution = stats?.score_distribution || [];
+
   return (
-    <div>
-      <header
-        className="page-header"
-        style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-      >
+    <div className="page-body">
+      {/* Header action button */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
-          <h1 className="page-title">Model Drift Monitoring</h1>
-          <p className="page-subtitle">
-            Two-sample Kolmogorov-Smirnov test comparing live score distributions against baseline
-          </p>
+          <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+            Kolmogorov-Smirnov two-sample testing against 40,000 baseline scores
+          </span>
         </div>
-        <button
-          className="btn btn-outline"
-          onClick={() => refetch()}
-          disabled={isFetching}
-          style={{ gap: 6 }}
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => refetch()}
+            title="Refresh status"
+          >
+            <RotateCcw style={{ width: 13, height: 13 }} />
+            <span>Refresh</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => runMutation.mutate()}
+            disabled={runMutation.isPending}
+            title="Execute immediate KS drift check on current reviews"
+          >
+            <Play style={{ width: 13, height: 13 }} />
+            <span>{runMutation.isPending ? "Evaluating..." : "Run check now"}</span>
+          </button>
+        </div>
+      </div>
+
+      {runMessage && (
+        <div
+          style={{
+            padding: "10px 14px",
+            background: runMessage.includes("DRIFT") ? "var(--danger-light)" : "var(--accent-light)",
+            border: `1px solid ${runMessage.includes("DRIFT") ? "var(--danger)" : "var(--accent)"}`,
+            borderRadius: "var(--radius)",
+            fontSize: "12.5px",
+            color: runMessage.includes("DRIFT") ? "var(--danger)" : "var(--accent)",
+            fontWeight: 600,
+            marginBottom: 20,
+          }}
         >
-          <RefreshCw style={{ width: 14, height: 14 }} />
-          {isFetching ? "Refreshing..." : "Refresh"}
-        </button>
-      </header>
+          {runMessage}
+        </div>
+      )}
 
-      <div className="page-body">
-        {/* Status Banner */}
-        {isAlert ? (
-          <div className="alert-banner danger">
-            <AlertTriangle style={{ width: 18, height: 18, flexShrink: 0 }} />
-            <div>
-              <strong>Model Drift Detected!</strong> {data?.message || "Prediction distribution has significantly shifted (p < 0.05). Retraining model recommended."}
-            </div>
-          </div>
-        ) : pValue != null ? (
-          <div className="alert-banner info">
-            <CheckCircle2 style={{ width: 18, height: 18, flexShrink: 0 }} />
-            <div>
-              <strong>Distribution Stable.</strong> Live review fraud scores conform to the reference baseline (p = {pValue.toFixed(4)} &ge; 0.05).
-            </div>
-          </div>
-        ) : (
-          <div className="alert-banner warning">
-            <Clock style={{ width: 18, height: 18, flexShrink: 0 }} />
-            <div>
-              <strong>Drift Scheduler Idle.</strong> {data?.message || "No drift events recorded yet. Run Celery beat or scripts/simulate_drift.py."}
-            </div>
-          </div>
-        )}
-
-        {/* Stat Cards */}
-        <div className="stat-grid">
-          <div className="stat-card">
-            <div className="stat-label">Latest KS p-Value</div>
-            <div
-              className={`stat-value ${
-                pValue == null
-                  ? ""
-                  : pValue < 0.05
-                  ? "danger"
-                  : "accent"
-              }`}
-            >
-              {pValue != null ? pValue.toFixed(4) : "N/A"}
-            </div>
-            <div style={{ fontSize: "11.5px", color: "var(--muted)", marginTop: 4 }}>
-              Significance Threshold: 0.0500
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-label">System Health</div>
-            <div className="stat-value" style={{ fontSize: "18px", marginTop: 4 }}>
-              {isAlert ? (
-                <span style={{ color: "var(--danger)" }}>DRIFT ALERT</span>
-              ) : pValue != null ? (
-                <span style={{ color: "var(--accent)" }}>HEALTHY</span>
-              ) : (
-                <span style={{ color: "var(--muted)" }}>AWAITING RUN</span>
-              )}
-            </div>
-            <div style={{ fontSize: "11.5px", color: "var(--muted)", marginTop: 4 }}>
-              KS Two-Sample Hypothesis
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-label">Last Evaluated</div>
-            <div className="stat-value" style={{ fontSize: "15px", marginTop: 6, color: "var(--ink)" }}>
-              {data?.checked_at
-                ? new Date(data.checked_at).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  })
-                : "Never"}
-            </div>
-            <div style={{ fontSize: "11.5px", color: "var(--muted)", marginTop: 4 }}>
-              Periodic Celery task
-            </div>
-          </div>
-
-          <div className="stat-card">
-            <div className="stat-label">Historical Checks</div>
-            <div className="stat-value">{events.length}</div>
-            <div style={{ fontSize: "11.5px", color: "var(--muted)", marginTop: 4 }}>
-              Recent events in memory
-            </div>
-          </div>
+      {/* KPI Cards */}
+      <div className="kpi-grid">
+        <div className="kpi-card">
+          <span className="kpi-label">Current Status</span>
+          <span
+            className="kpi-value"
+            style={{
+              fontSize: 18,
+              color: isAlert ? "var(--danger)" : "var(--accent)",
+            }}
+          >
+            {isAlert ? "DRIFT DETECTED" : "DISTRIBUTION STABLE"}
+          </span>
+          <span className="kpi-meta">
+            {isAlert ? "Score distribution shifted" : "Within confidence bounds"}
+          </span>
         </div>
 
-        {/* Chart Section */}
-        <div className="chart-card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h2 className="chart-title" style={{ margin: 0 }}>
-              p-Value Trajectory (Drift Alert Threshold = 0.05)
-            </h2>
-            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
-              Values below red dashed line trigger drift alert
-            </span>
+        <div className="kpi-card">
+          <span className="kpi-label">Latest p-value</span>
+          <span className="kpi-value mono" style={{ fontSize: 20 }}>
+            {latestPValue != null ? Number(latestPValue).toExponential(4) : "N/A"}
+          </span>
+          <span className="kpi-meta">Significance threshold &alpha; = 0.05</span>
+        </div>
+
+        <div className="kpi-card">
+          <span className="kpi-label">Reference Baseline</span>
+          <span className="kpi-value mono" style={{ fontSize: 20 }}>
+            40,000
+          </span>
+          <span className="kpi-meta">Fixed reference_scores.npy</span>
+        </div>
+
+        <div className="kpi-card">
+          <span className="kpi-label">Drift Check Schedule</span>
+          <span className="kpi-value" style={{ fontSize: 18 }}>
+            HOURLY
+          </span>
+          <span className="kpi-meta">Automated Celery beat task</span>
+        </div>
+      </div>
+
+      {/* Charts Row */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))", gap: 20, marginBottom: 24 }}>
+        {/* p-value Trend Chart on Log Scale */}
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <h2 className="card-title">p-value History (Log Scale)</h2>
+              <p className="card-subtitle">
+                Chronological p-values with labeled 0.05 significance alert line
+              </p>
+            </div>
           </div>
 
-          {chartData.length > 0 ? (
-            <div style={{ width: "100%", height: 260 }}>
+          <div style={{ width: "100%", height: 240 }}>
+            {chartData.length === 0 ? (
+              <div className="empty-state" style={{ height: "100%", justifyContent: "center" }}>
+                <p className="empty-state-desc">No drift runs recorded. Click "Run check now".</p>
+              </div>
+            ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <LineChart data={chartData} margin={{ top: 15, right: 20, left: -10, bottom: 0 }}>
                   <XAxis
-                    dataKey="name"
-                    tick={{ fill: "var(--muted)", fontSize: 11 }}
+                    dataKey="time"
+                    tick={{ fontSize: 11, fill: "var(--muted)" }}
                     stroke="var(--border)"
                   />
                   <YAxis
-                    domain={[0, 1]}
-                    tick={{ fill: "var(--muted)", fontSize: 11 }}
+                    scale="log"
+                    domain={[1e-6, 1]}
+                    tick={{ fontSize: 11, fill: "var(--muted)" }}
                     stroke="var(--border)"
+                    tickFormatter={(val) => (val < 0.001 ? val.toExponential(0) : val.toFixed(2))}
                   />
                   <Tooltip
                     contentStyle={{
@@ -192,7 +216,10 @@ export default function DriftPage() {
                       fontSize: "12px",
                       boxShadow: "none",
                     }}
-                    formatter={(val) => [val, "p-value"]}
+                    formatter={(val, name, item) => [
+                      item.payload.rawP != null ? item.payload.rawP.toExponential(4) : "N/A",
+                      "p-value",
+                    ]}
                   />
                   <ReferenceLine
                     y={0.05}
@@ -201,7 +228,7 @@ export default function DriftPage() {
                     label={{
                       value: "Threshold (0.05)",
                       fill: "var(--danger)",
-                      fontSize: 11,
+                      fontSize: 10,
                       position: "right",
                     }}
                   />
@@ -209,90 +236,138 @@ export default function DriftPage() {
                     type="monotone"
                     dataKey="pValue"
                     stroke="var(--accent)"
-                    strokeWidth={2.5}
-                    dot={{ r: 4, fill: "var(--accent)" }}
-                    activeDot={{ r: 6 }}
+                    strokeWidth={2}
+                    dot={{ fill: "var(--accent)", r: 3 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="empty-state" style={{ padding: "36px 0" }}>
-              <Activity style={{ width: 32, height: 32, color: "var(--muted)", margin: "0 auto 8px" }} />
-              <div style={{ fontSize: "13px", color: "var(--muted)" }}>
-                No historical drift points plotted yet. Run drift checks to visualize trends.
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Drift Events History Table */}
-        <div className="card" style={{ marginTop: 20 }}>
-          <h2 className="chart-title">Drift Evaluation History</h2>
-          {events.length === 0 ? (
-            <div className="empty-state">
-              <Clock style={{ width: 36, height: 36, color: "var(--muted)", margin: "0 auto 12px" }} />
-              <h3 className="empty-state-title">No drift events logged</h3>
-              <p className="empty-state-desc">
-                The drift monitoring worker runs periodically or via manual simulation. To simulate
-                drift immediately, run:
-                <br />
-                <code>python scripts/simulate_drift.py</code>
+        {/* Reference vs Live Score Histogram */}
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <h2 className="card-title">Reference vs Live Score Histogram</h2>
+              <p className="card-subtitle">
+                20-bin relative density comparison across score intervals
               </p>
             </div>
-          ) : (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Timestamp</th>
-                    <th>p-Value</th>
-                    <th>Status</th>
-                    <th>Sample Size</th>
-                    <th>Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {events.map((evt, idx) => {
-                    const evtP = evt.p_value;
-                    const alert = evt.alert;
-                    return (
-                      <tr key={idx}>
-                        <td className="mono" style={{ whiteSpace: "nowrap" }}>
-                          {evt.checked_at
-                            ? new Date(evt.checked_at).toLocaleString()
-                            : "N/A"}
-                        </td>
-                        <td>
-                          <span
-                            className={`mono ${
-                              evtP != null && evtP < 0.05
-                                ? "p-value-alert"
-                                : "p-value-normal"
-                            }`}
-                          >
-                            {evtP != null ? evtP.toFixed(4) : "N/A"}
-                          </span>
-                        </td>
-                        <td>
-                          {alert ? (
-                            <span className="badge badge-quarantined">Drift Alert</span>
-                          ) : (
-                            <span className="badge badge-reviewed">Normal</span>
-                          )}
-                        </td>
-                        <td className="mono">{evt.sample_size || "N/A"}</td>
-                        <td style={{ color: "var(--muted)", fontSize: "12.5px" }}>
-                          {evt.message || (alert ? "Drift detected" : "Distributions match baseline")}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          </div>
+
+          <div style={{ width: "100%", height: 240 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={scoreDistribution} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
+                <XAxis
+                  dataKey="bin"
+                  tick={{ fontSize: 10, fill: "var(--muted)" }}
+                  stroke="var(--border)"
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "var(--muted)" }}
+                  tickFormatter={(val) => `${val}%`}
+                  stroke="var(--border)"
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--surface)",
+                    borderColor: "var(--border)",
+                    borderRadius: "var(--radius)",
+                    fontSize: "12px",
+                    boxShadow: "none",
+                  }}
+                  formatter={(val, name) => [
+                    `${Number(val).toFixed(1)}%`,
+                    name === "live_pct" ? "Live Reviews" : "Reference Baseline",
+                  ]}
+                />
+                <Bar dataKey="reference_pct" name="reference_pct" fill="var(--muted)" opacity={0.4} />
+                <Bar dataKey="live_pct" name="live_pct" fill="var(--accent)" opacity={0.85} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+      </div>
+
+      {/* Events Table marking source (scheduled or simulated or manual) */}
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <h2 className="card-title">Drift Events Log</h2>
+            <p className="card-subtitle">
+              Audit log of statistical evaluations marking source (scheduled, simulated, or manual)
+            </p>
+          </div>
+        </div>
+
+        {events.length === 0 ? (
+          <div className="empty-state">
+            <p className="empty-state-desc">No events logged in database.</p>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Source</th>
+                  <th>KS Statistic</th>
+                  <th>p-value</th>
+                  <th>Result</th>
+                  <th>Reference N</th>
+                  <th>Live N</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((evt, idx) => {
+                  const source = evt.source || (evt.simulated ? "simulated" : "scheduled");
+                  return (
+                    <tr key={idx}>
+                      <td style={{ fontSize: "12px", color: "var(--muted)", whiteSpace: "nowrap" }}>
+                        {evt.checked_at ? new Date(evt.checked_at).toLocaleString() : "Recent"}
+                      </td>
+                      <td>
+                        <span
+                          className="mono"
+                          style={{
+                            fontSize: "11px",
+                            padding: "2px 6px",
+                            borderRadius: 3,
+                            background: source === "simulated" ? "var(--warning-light)" : "var(--bg)",
+                            color: source === "simulated" ? "var(--warning)" : "var(--muted)",
+                            border: "1px solid var(--border)",
+                          }}
+                        >
+                          {source.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="mono" style={{ fontSize: "12px" }}>
+                        {evt.ks_statistic != null ? Number(evt.ks_statistic).toFixed(4) : "N/A"}
+                      </td>
+                      <td className="mono" style={{ fontSize: "12px" }}>
+                        {evt.p_value != null ? Number(evt.p_value).toExponential(4) : "N/A"}
+                      </td>
+                      <td>
+                        {evt.alert ? (
+                          <span className="badge badge-quarantined">Drift Alert</span>
+                        ) : (
+                          <span className="badge badge-reviewed">Pass</span>
+                        )}
+                      </td>
+                      <td className="mono" style={{ fontSize: "12px" }}>
+                        {evt.n_reference || 40000}
+                      </td>
+                      <td className="mono" style={{ fontSize: "12px" }}>
+                        {evt.n_live || 1000}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

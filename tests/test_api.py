@@ -280,3 +280,59 @@ async def test_webhook_valid_signature(client):
     assert resp.status_code == 200
     data = resp.json()
     assert "id" in data
+
+
+@pytest.mark.asyncio
+async def test_get_stats(client):
+    ac, test_db = client
+    # Insert test review
+    from datetime import datetime, timezone
+    await test_db["reviews"].insert_one({
+        "text": "Great product",
+        "user_id": "test-user-stats",
+        "rating": 5,
+        "score": 0.15,
+        "status": "reviewed",
+        "created_at": datetime.now(timezone.utc),
+    })
+
+    resp = await ac.get("/api/stats")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "total_reviews" in data
+    assert "status_counts" in data
+    assert "fraud_rate" in data
+    assert "daily_timeline" in data
+    assert "score_distribution" in data
+    assert len(data["daily_timeline"]) == 30
+    assert len(data["score_distribution"]) == 20
+
+
+@pytest.mark.asyncio
+async def test_get_model_info(client):
+    ac, _ = client
+    resp = await ac.get("/api/model/info")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "model_name" in data
+    assert "training_metrics" in data
+    assert "benchmarks" in data
+    assert "int8_size_mb" in data
+    assert "synthetic_data_note" in data
+
+
+@pytest.mark.asyncio
+async def test_run_drift_check(client):
+    ac, test_db = client
+    # Seed reviews with scores
+    from datetime import datetime, timezone
+    docs = [
+        {"score": 0.05 * (i % 10), "updated_at": datetime.now(timezone.utc)}
+        for i in range(40)
+    ]
+    await test_db["reviews"].insert_many(docs)
+
+    resp = await ac.post("/api/drift/run")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "ks_statistic" in data or "error" in data

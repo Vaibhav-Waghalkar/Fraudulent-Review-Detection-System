@@ -40,6 +40,20 @@ export function fetchDriftStatus() {
   return apiFetch("/drift/status");
 }
 
+export function runDriftCheck() {
+  return apiFetch("/drift/run", {
+    method: "POST",
+  });
+}
+
+export function fetchStats() {
+  return apiFetch("/stats");
+}
+
+export function fetchModelInfo() {
+  return apiFetch("/model/info");
+}
+
 export function fetchHealth() {
   return fetch("/health").then((r) => r.json());
 }
